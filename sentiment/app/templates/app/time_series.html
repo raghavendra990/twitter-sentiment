@@ -1,0 +1,90 @@
+{% extends 'app/base.html' %}
+
+{% load staticfiles %} 
+
+{% block title %}index{% endblock %}
+
+{% block link %}Scatter{% endblock %}
+
+{% block body %}
+
+<style type="text/css">
+        text {
+            font: 12px sans-serif;
+        }
+        svg {
+            display: block;
+        }
+        html, body, #chart1, svg {
+            margin: 0px;
+            padding: 0px;
+            height: 300px;
+            width: 100%;
+        }
+
+        .nvd3 line.nv-guideline { // Hide the guideline because it is ugly. Ideally, we would make the guideline as wide as the bars and semi-transparent, instead of hiding it.
+            display: none;
+            stroke-width: 0.0;
+        }
+
+        .nvd3 .nv-bars rect { // fix the hover guideline to be snappy
+          transition: fill-opacity 0ms linear;
+          -moz-transition: fill-opacity 0ms linear;
+          -webkit-transition: fill-opacity 0ms linear;
+        }
+
+        .nvd3 .nv-x .nv-axis .x-axis-tick-mark {
+            stroke: #000; // black tick marks
+        }
+
+        .nvd3 .nv-y .nv-axis .tick.zero line {
+            stroke: #000; // black line for the x axis
+        }
+
+</style>
+
+
+<script type="text/javascript">
+
+data  = {{b|safe}}
+
+
+nv.addGraph(function() {
+  var chart = nv.models.historicalBarChart()
+    .x(function(d) { return d[0] })
+    //adjusting, 100% is 1.00, not 100 as it is in the data
+    .y(function(d) { return d[1] / 100 })
+    .color(d3.scale.category10().range())
+    .useInteractiveGuideline(true)
+    ;
+
+  chart.xAxis
+    .tickFormat(function(d) {
+      return d3.time.format('%Y-%m-%d %H:%M:%S')(new Date(d))
+    });
+
+  chart.yAxis.tickFormat(d3.format('0'));
+
+  d3.select('#chart svg')
+    .datum(data)
+    .transition().duration(500)
+    .call(chart)
+    ;
+
+  nv.utils.windowResize(chart.update);
+
+  return chart;
+});
+
+</script>
+
+
+<div>Try resizing the panel to see the various types of time labels. </div>
+<br>
+
+{{b}}
+<div id="chart">
+  <svg></svg>
+</div>
+
+{% endblock %}

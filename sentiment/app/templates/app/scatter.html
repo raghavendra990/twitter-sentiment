@@ -1,0 +1,71 @@
+{% extends 'app/base.html' %}
+
+{% load staticfiles %} 
+
+{% block title %}index{% endblock %}
+
+{% block link %}Scatter{% endblock %}
+
+{% block body %}
+
+<link rel="stylesheet" type="text/css" href="{% static "css/nv.d3.css"%}">
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script type="text/javascript" src="{% static "js/nv.d3.js"%}"></script>
+  
+<div id="chart">
+  <svg style= "height:500"></svg>
+</div>
+
+
+
+<script type="text/javascript">
+nv.addGraph(function() {
+  var chart = nv.models.scatterChart()
+                .showDistX(true)
+                .showDistY(true)
+                .color(d3.scale.category10().range());
+
+  chart.xAxis.tickFormat(d3.format('.02f'));
+  chart.yAxis.tickFormat(d3.format('.02f'));
+
+  d3.select('#chart svg')
+      .datum(data(1))
+    .transition().duration(500)
+      .call(chart);
+
+  nv.utils.windowResize(chart.update);
+
+  return chart;
+});
+
+function data(groups) {
+  var data = [],
+      shapes = ['circle', 'cross', 'triangle-up', 'triangle-down', 'diamond', 'square'],
+      random = d3.random.normal();
+
+  var points = {{scatter|safe}} ; 
+ 
+  for (i = 0; i < groups; i++) {
+    data.push({
+      key: 'Group ' + i,
+      values: []
+    });
+
+
+    for (j = 0; j < points.length ; j++) {
+      data[i].values.push({
+        x: points[j].polarity
+      , y: points[j].subjectivity
+      , size: Math.random()
+      //, shape: shapes[j % 6]
+      });
+    }
+  }
+  
+  return data;
+}
+
+</script>
+
+
+{% endblock %}
